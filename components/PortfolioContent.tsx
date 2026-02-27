@@ -1,4 +1,6 @@
-async function PorfolioContent() {
+import { HeroSection } from "./sections/HeroSection";
+
+async function PortfolioContent() {
   return (
     <>
       <HeroSection />
@@ -16,3 +18,5 @@ async function PorfolioContent() {
     </>
   );
 }
+
+export default PortfolioContent;
