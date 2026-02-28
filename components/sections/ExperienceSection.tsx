@@ -4,6 +4,26 @@ import { defineQuery } from "next-sanity";
 import { urlFor } from "@/sanity/lib/image";
 import { sanityFetch } from "@/sanity/lib/live";
 
+// 1. Define the TypeScript interface based on your query
+interface Experience {
+  company?: string;
+  position?: string;
+  employmentType?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
+  description?: any; // PortableText handles its own internal typing
+  responsibilities?: string[];
+  achievements?: string[];
+  technologies?: Array<{
+    name?: string;
+    category?: string;
+  }>;
+  companyLogo?: any;
+  companyWebsite?: string;
+}
+
 const EXPERIENCE_QUERY =
   defineQuery(`*[_type == "experience"] | order(startDate desc){
   company,
@@ -22,7 +42,9 @@ const EXPERIENCE_QUERY =
 }`);
 
 export async function ExperienceSection() {
-  const { data: experiences } = await sanityFetch({ query: EXPERIENCE_QUERY });
+  // 2. Cast the data to the Experience array type
+  const { data } = await sanityFetch({ query: EXPERIENCE_QUERY });
+  const experiences = data as Experience[];
 
   if (!experiences || experiences.length === 0) {
     return null;
@@ -62,7 +84,7 @@ export async function ExperienceSection() {
                     <div className="relative w-12 h-12 @md/card:w-16 @md/card:h-16 rounded-lg overflow-hidden border shrink-0">
                       <Image
                         src={urlFor(exp.companyLogo).width(64).height(64).url()}
-                        alt={`${exp.company} company logo`}
+                        alt={`${exp.company || "Company"} logo`}
                         fill
                         className="object-cover"
                       />
@@ -88,7 +110,7 @@ export async function ExperienceSection() {
                     </div>
                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs @md/card:text-sm text-muted-foreground">
                       <span>
-                        {exp.startDate && formatDate(exp.startDate)} -{" "}
+                        {exp.startDate ? formatDate(exp.startDate) : "N/A"} -{" "}
                         {exp.current
                           ? "Present"
                           : exp.endDate
@@ -117,7 +139,8 @@ export async function ExperienceSection() {
                       Key Responsibilities:
                     </h4>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs @md/card:text-sm">
-                      {exp.responsibilities.map((resp, idx) => (
+                      {/* resp and idx are now typed because exp is typed */}
+                      {exp.responsibilities.map((resp: string, idx: number) => (
                         <li key={`${exp.company}-resp-${idx}`}>{resp}</li>
                       ))}
                     </ul>
@@ -130,11 +153,13 @@ export async function ExperienceSection() {
                       Achievements:
                     </h4>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground text-xs @md/card:text-sm">
-                      {exp.achievements.map((achievement, idx) => (
-                        <li key={`${exp.company}-achievement-${idx}`}>
-                          {achievement}
-                        </li>
-                      ))}
+                      {exp.achievements.map(
+                        (achievement: string, idx: number) => (
+                          <li key={`${exp.company}-achievement-${idx}`}>
+                            {achievement}
+                          </li>
+                        ),
+                      )}
                     </ul>
                   </div>
                 )}
