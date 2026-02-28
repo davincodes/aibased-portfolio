@@ -45,11 +45,11 @@ export default async function RootLayout({
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
-          >
-            <Script
-              src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
-              strategy="afterInteractive"
-            /> */}
+          > */}
+          <Script
+            src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
+            strategy="afterInteractive"
+          />
 
           <SidebarProvider defaultOpen={false}>
             <SidebarInset className="">{children}</SidebarInset>
