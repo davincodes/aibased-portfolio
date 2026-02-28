@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type React from "react";
+import { ClerkProvider } from "@clerk/nextjs"; // 1. Add this import
 
 export const metadata: Metadata = {
   title: "NextGen Portfolio Studio",
@@ -8,9 +9,13 @@ export const metadata: Metadata = {
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <ClerkProvider>
+      {" "}
+      {/* 2. Wrap the entire structure */}
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
 
