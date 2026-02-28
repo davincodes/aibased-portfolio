@@ -2,6 +2,12 @@ import { PortableText } from "@portabletext/react";
 import Link from "next/link";
 import { defineQuery } from "next-sanity";
 import { sanityFetch } from "@/sanity/lib/live";
+import {
+  ReactElement,
+  JSXElementConstructor,
+  ReactNode,
+  ReactPortal,
+} from "react";
 
 const ABOUT_QUERY = defineQuery(`*[_id == "singleton-profile"][0]{
   firstName,
@@ -97,19 +103,81 @@ export async function AboutSection() {
         {profile.stats && profile.stats.length > 0 && (
           <div className="@container mt-12 pt-12 border-t">
             <div className="grid grid-cols-2 @lg:grid-cols-4 gap-6">
-              {profile.stats.map((stat, idx) => (
-                <div
-                  key={`${stat.label}-${idx}`}
-                  className="@container/stat text-center"
-                >
-                  <div className="text-3xl @md/stat:text-4xl font-bold text-primary mb-2">
-                    {stat.value}
+              {profile.stats.map(
+                (
+                  stat: {
+                    label:
+                      | string
+                      | number
+                      | bigint
+                      | boolean
+                      | ReactElement<
+                          unknown,
+                          string | JSXElementConstructor<any>
+                        >
+                      | Iterable<ReactNode>
+                      | ReactPortal
+                      | Promise<
+                          | string
+                          | number
+                          | bigint
+                          | boolean
+                          | ReactPortal
+                          | ReactElement<
+                              unknown,
+                              string | JSXElementConstructor<any>
+                            >
+                          | Iterable<ReactNode>
+                          | null
+                          | undefined
+                        >
+                      | Iterable<ReactNode>
+                      | null
+                      | undefined;
+                    value:
+                      | string
+                      | number
+                      | bigint
+                      | boolean
+                      | ReactElement<
+                          unknown,
+                          string | JSXElementConstructor<any>
+                        >
+                      | Iterable<ReactNode>
+                      | ReactPortal
+                      | Promise<
+                          | string
+                          | number
+                          | bigint
+                          | boolean
+                          | ReactPortal
+                          | ReactElement<
+                              unknown,
+                              string | JSXElementConstructor<any>
+                            >
+                          | Iterable<ReactNode>
+                          | null
+                          | undefined
+                        >
+                      | Iterable<ReactNode>
+                      | null
+                      | undefined;
+                  },
+                  idx: any,
+                ) => (
+                  <div
+                    key={`${stat.label}-${idx}`}
+                    className="@container/stat text-center"
+                  >
+                    <div className="text-3xl @md/stat:text-4xl font-bold text-primary mb-2">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs @md/stat:text-sm text-muted-foreground">
+                      {stat.label}
+                    </div>
                   </div>
-                  <div className="text-xs @md/stat:text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </div>
         )}

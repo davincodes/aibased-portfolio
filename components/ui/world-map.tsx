@@ -1,9 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import DottedMap from "dotted-map";
-
 import { useTheme } from "next-themes";
 
 interface MapProps {
@@ -19,16 +18,20 @@ export default function WorldMap({
   lineColor = "#0ea5e9",
 }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const map = new DottedMap({ height: 100, grid: "diagonal" });
-
   const { theme } = useTheme();
+  const [svgMap, setSvgMap] = useState<string>(""); // store client-side SVG
 
-  const svgMap = map.getSVG({
-    radius: 0.22,
-    color: theme === "dark" ? "#FFFFFF40" : "#00000040",
-    shape: "circle",
-    backgroundColor: theme === "dark" ? "black" : "white",
-  });
+  // Generate the map **only on the client**
+  useEffect(() => {
+    const map = new DottedMap({ height: 100, grid: "diagonal" });
+    const generatedSvg = map.getSVG({
+      radius: 0.22,
+      color: theme === "dark" ? "#FFFFFF40" : "#00000040",
+      shape: "circle",
+      backgroundColor: theme === "dark" ? "black" : "white",
+    });
+    setSvgMap(generatedSvg);
+  }, [theme]);
 
   const projectPoint = (lat: number, lng: number) => {
     const x = (lng + 180) * (800 / 360);
@@ -45,8 +48,11 @@ export default function WorldMap({
     return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
   };
 
+  // Only render the <img> once the svgMap is generated
+  if (!svgMap) return null;
+
   return (
-    <div className="w-full aspect-[2/1] dark:bg-black bg-white rounded-lg  relative font-sans">
+    <div className="w-full aspect-[2/1] dark:bg-black bg-white rounded-lg relative font-sans">
       <img
         src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
         className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
@@ -55,6 +61,7 @@ export default function WorldMap({
         width="1056"
         draggable={false}
       />
+
       <svg
         ref={svgRef}
         viewBox="0 0 800 400"
@@ -70,19 +77,10 @@ export default function WorldMap({
                 fill="none"
                 stroke="url(#path-gradient)"
                 strokeWidth="1"
-                initial={{
-                  pathLength: 0,
-                }}
-                animate={{
-                  pathLength: 1,
-                }}
-                transition={{
-                  duration: 1,
-                  delay: 0.5 * i,
-                  ease: "easeOut",
-                }}
-                key={`start-upper-${i}`}
-              ></motion.path>
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 1, delay: 0.5 * i, ease: "easeOut" }}
+              />
             </g>
           );
         })}
@@ -117,7 +115,6 @@ export default function WorldMap({
                   from="2"
                   to="8"
                   dur="1.5s"
-                  begin="0s"
                   repeatCount="indefinite"
                 />
                 <animate
@@ -125,7 +122,6 @@ export default function WorldMap({
                   from="0.5"
                   to="0"
                   dur="1.5s"
-                  begin="0s"
                   repeatCount="indefinite"
                 />
               </circle>
@@ -149,7 +145,6 @@ export default function WorldMap({
                   from="2"
                   to="8"
                   dur="1.5s"
-                  begin="0s"
                   repeatCount="indefinite"
                 />
                 <animate
@@ -157,7 +152,6 @@ export default function WorldMap({
                   from="0.5"
                   to="0"
                   dur="1.5s"
-                  begin="0s"
                   repeatCount="indefinite"
                 />
               </circle>

@@ -125,12 +125,6 @@ export async function HeroSection() {
                     <span>{profile.location}</span>
                   </div>
                 )}
-                {profile.availability && (
-                  <div className="flex items-center gap-2">
-                    <span>✅</span>
-                    <span>{profile.availability}</span>
-                  </div>
-                )}
               </div>
             </div>
 
