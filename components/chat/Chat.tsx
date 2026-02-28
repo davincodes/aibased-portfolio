@@ -1,38 +1,32 @@
 "use client";
+
+import { useState, useEffect } from "react";
 import { ChatKit, useChatKit } from "@openai/chatkit-react";
 import { createSession } from "@/actions/create-session";
 import { useSidebar } from "../ui/sidebar";
 import { CHAT_PROFILE_QUERYResult } from "@/sanity.types";
-// Import the type for profile query result
 
 export function Chat({
   profile,
 }: {
   profile: CHAT_PROFILE_QUERYResult | null;
 }) {
+  const [hasMounted, setHasMounted] = useState(false);
   const { toggleSidebar } = useSidebar();
-  // Generate greeting based on available profile data
-  const getGreeting = () => {
-    if (!profile?.firstName) {
-      return "Hi there! Ask me anything about my work, experience, or projects.";
-    }
 
-    // The .filter(Boolean) removes all falsy values from the array, so if the firstName or lastName is not set, it will be removed
-    const fullName = [profile.firstName, profile.lastName]
-      .filter(Boolean)
-      .join(" ");
-
-    return `Hi! I'm ${fullName}. Ask me anything about my work, experience, or projects.`;
-  };
+  // This effect only runs on the client after the first render
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const { control } = useChatKit({
     api: {
       getClientSecret: async (_existingSecret) => {
-        // Called on initial load and when session needs refresh, we dont actuall use the existing secret as userId is managed by Clerk
+        // Prevents the API call from firing during the Next.js build process
+        if (typeof window === "undefined") return "";
         return createSession();
       },
     },
-    // https://chatkit.studio/playground
     theme: {},
     header: {
       title: {
@@ -46,7 +40,15 @@ export function Chat({
       },
     },
     startScreen: {
-      greeting: getGreeting(),
+      greeting: (() => {
+        if (!profile?.firstName) {
+          return "Hi there! Ask me anything about my work, experience, or projects.";
+        }
+        const fullName = [profile.firstName, profile.lastName]
+          .filter(Boolean)
+          .join(" ");
+        return `Hi! I'm ${fullName}. Ask me anything about my work, experience, or projects.`;
+      })(),
       prompts: [
         {
           icon: "suitcase",
@@ -74,16 +76,8 @@ export function Chat({
     },
     composer: {
       models: [
-        {
-          id: "crisp",
-          label: "Crisp",
-          description: "Concise and factual",
-        },
-        {
-          id: "clear",
-          label: "Clear",
-          description: "Focused and helpful",
-        },
+        { id: "crisp", label: "Crisp", description: "Concise and factual" },
+        { id: "clear", label: "Clear", description: "Focused and helpful" },
         {
           id: "chatty",
           label: "Chatty",
@@ -91,11 +85,15 @@ export function Chat({
         },
       ],
     },
-
     disclaimer: {
       text: "Disclaimer: This is my AI-powered twin. It may not be 100% accurate and should be verified for accuracy.",
     },
   });
+
+  // If we are server-side (building), return nothing to avoid the Clerk context error
+  if (!hasMounted) {
+    return null;
+  }
 
   return <ChatKit control={control} className="h-full w-full z-50" />;
 }
