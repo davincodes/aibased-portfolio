@@ -1,3 +1,4 @@
+"use client";
 import type { Metadata } from "next";
 import type React from "react";
 import { ClerkProvider } from "@clerk/nextjs"; // 1. Add this import
