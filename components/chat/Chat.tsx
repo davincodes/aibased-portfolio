@@ -21,10 +21,17 @@ export function Chat({
 
   const { control } = useChatKit({
     api: {
-      getClientSecret: async (_existingSecret) => {
+      // FIX: Added Promise<string> type and nullish coalescing (?? "")
+      // to resolve the TypeScript error seen in image_e8763b.png
+      getClientSecret: async (_existingSecret): Promise<string> => {
         // Prevents the API call from firing during the Next.js build process
         if (typeof window === "undefined") return "";
-        return createSession();
+
+        const secret = await createSession();
+
+        // Return an empty string if secret is null to prevent
+        // the "blank screen" hydration crash
+        return secret ?? "";
       },
     },
     theme: {},
