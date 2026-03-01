@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react"; // Added hooks
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -12,6 +13,20 @@ import {
 
 export function ModeToggle() {
   const { setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // useEffect only runs on the client, so we know we are safely hydrated
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // While waiting for the client to mount, we render a placeholder
+  // with the same dimensions to prevent the layout from jumping.
+  if (!mounted) {
+    return (
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 dark:bg-black/30 border border-white/30" />
+    );
+  }
 
   return (
     <DropdownMenu>
